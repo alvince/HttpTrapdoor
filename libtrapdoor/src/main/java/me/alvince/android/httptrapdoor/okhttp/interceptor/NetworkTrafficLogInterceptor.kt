@@ -22,6 +22,7 @@
 
 package me.alvince.android.httptrapdoor.okhttp.interceptor
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -123,7 +124,7 @@ class NetworkTrafficLogInterceptor : Interceptor {
             }
         }
         GlobalScope.launch(logPrintDispatcher + exceptionHandler) {
-            lineList.onEach { TrapdoorLogger.i(it) }
+            lineList.onEach { Log.i(TRAFFIC_TAG, it) }
         }
     }
 

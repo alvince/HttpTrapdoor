@@ -60,7 +60,7 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
     }
 
     fun factory(): Call.Factory {
-        return HttpCallFactoryProxy.create(source)
+        return HttpCallFactoryProxy.create(source, instrumentation)
     }
 
 }

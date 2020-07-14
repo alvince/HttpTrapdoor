@@ -35,6 +35,9 @@ import androidx.annotation.RestrictTo
 internal class TrapdoorInstrumentation private constructor() {
 
     companion object {
+        /**
+         * Global elements configured
+         */
         private var elementsConfigured: List<HostElement>? = null
 
         internal fun obtain(): TrapdoorInstrumentation {
@@ -55,10 +58,22 @@ internal class TrapdoorInstrumentation private constructor() {
         }
     }
 
-    fun hostElements() = elementsConfigured?.toList() ?: emptyList()
+    /**
+     * custom extensional elements
+     */
+    private var customElements = mutableListOf<HostElement>()
+
+    fun hostElements() = (elementsConfigured?.toList() ?: emptyList()) + customElements
 
     fun pickElement(tag: String) {
 
+    }
+
+    internal fun checkHostConfigured(host: String): Boolean {
+        if (host.isEmpty()) {
+            return false
+        }
+        return hostElements().map { it.host }.contains(host)
     }
 
 }
