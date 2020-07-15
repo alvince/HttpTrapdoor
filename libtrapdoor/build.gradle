@@ -31,8 +31,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${getProperty('kotlin.coroutines')}"
     implementation "androidx.appcompat:appcompat:${getProperty('androidx.appcompat')}"
     implementation "androidx.core:core-ktx:${getProperty('androidx.core')}"
-    implementation "androidx.startup:startup-runtime:${getProperty('androidx.startup')}"
     implementation "com.squareup.okhttp3:okhttp:${getProperty('lib.square.okhttp')}"
+
+    api "androidx.startup:startup-runtime:${getProperty('androidx.startup')}"
 
     testImplementation "junit:junit:${getProperty('lib.junit')}"
 

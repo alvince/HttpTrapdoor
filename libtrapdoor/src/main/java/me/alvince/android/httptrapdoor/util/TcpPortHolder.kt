@@ -20,43 +20,34 @@
  * SOFTWARE.
  */
 
-package me.alvince.android.httptrapdoor
+package me.alvince.android.httptrapdoor.util
 
-import me.alvince.android.httptrapdoor.util.TcpPortHolder
+import androidx.annotation.RestrictTo
+import java.util.*
 
 /**
- * Trapdoor host element defined
+ * Internal holder for TCP/IP protocols' port
  *
- * Created by alvince on 2020/7/14
+ * Created by alvince on 2020/7/15
  *
  * @author alvince.zy@gmail.com
  */
-data class HostElement(
-    /**
-     * the user-visible host desc
-     */
-    val name: String,
-    /**
-     * the unique tag of host element
-     */
-    val tag: String,
-    /**
-     * the host part
-     */
-    val host: String,
-    /**
-     * the scheme of host element
-     *
-     * can be `http` or `https`
-     */
-    var scheme: String = "https"
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+object TcpPortHolder {
 
-) {
+    private const val PORT_HTTP = 80
+    private const val PORT_HTTPS = 443
 
-    val port: Int get() = TcpPortHolder.port(scheme)
-
-    override fun toString(): String {
-        return "HostElement(name='$name', tag='$tag', host_url='$scheme://$host')"
+    @Throws(IllegalArgumentException::class)
+    fun port(protocol: String): Int {
+        if (protocol.isEmpty()) {
+            throw IllegalArgumentException("Must provide a valid tcp protocol.")
+        }
+        return when (protocol.toLowerCase(Locale.getDefault())) {
+            "http" -> PORT_HTTP
+            "https" -> PORT_HTTPS
+            else -> throw IllegalArgumentException("No support TCP-Protocol: $protocol")
+        }
     }
 
 }

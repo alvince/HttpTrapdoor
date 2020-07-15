@@ -24,6 +24,7 @@ package me.alvince.android.httptrapdoor.okhttp
 
 import me.alvince.android.httptrapdoor.TrapdoorInstrumentation
 import okhttp3.Call
+import okhttp3.HttpUrl
 import okhttp3.Request
 
 /**
@@ -46,12 +47,12 @@ internal class HttpCallFactoryProxy private constructor(
 
     override fun newCall(request: Request): Call =
         request.let { origin ->
-            if (!checkRequestCanOverride(origin)) {
-                // TODO: override request with host/scheme/port replace
-                origin.newBuilder().apply {
-
-                }
-                origin
+            if (shouldOverrideRequest(origin)) {
+                origin.newBuilder()
+                    .apply {
+                        overrideRequestUrl(origin.url()).also { url -> url(url) }
+                    }
+                    .build()
             } else {
                 origin
             }
@@ -59,7 +60,20 @@ internal class HttpCallFactoryProxy private constructor(
             factory.newCall(it)
         }
 
-    private fun checkRequestCanOverride(request: Request): Boolean =
+    private fun shouldOverrideRequest(request: Request): Boolean =
         instrumentation.checkHostConfigured(request.url().host())
+
+    private fun overrideRequestUrl(src: HttpUrl): HttpUrl =
+        instrumentation.currentHost()
+            ?.let { element ->
+                src.newBuilder()
+                    .apply {
+                        scheme(element.scheme)
+                        host(element.host)
+                        port(element.port)
+                    }
+                    .build()
+            }
+            ?: src
 
 }

@@ -58,6 +58,8 @@ internal class TrapdoorInstrumentation private constructor() {
         }
     }
 
+    private var currentHostTag: String = ""
+
     /**
      * custom extensional elements
      */
@@ -65,15 +67,30 @@ internal class TrapdoorInstrumentation private constructor() {
 
     fun hostElements() = (elementsConfigured?.toList() ?: emptyList()) + customElements
 
-    fun pickElement(tag: String) {
-
-    }
-
     internal fun checkHostConfigured(host: String): Boolean {
         if (host.isEmpty()) {
             return false
         }
         return hostElements().map { it.host }.contains(host)
     }
+
+    internal fun currentHost(): HostElement? {
+        return currentHostTag
+            .takeIf { it.isNotEmpty() }
+            ?.let { getElementByTag(it) }
+    }
+
+    internal fun pick(hostTag: String) {
+        hostTag.takeIf { it != currentHostTag }
+            ?.also { currentHostTag = it }
+    }
+
+    private fun getElementByTag(tag: String): HostElement? =
+        tag.takeIf { it.isNotEmpty() }
+            ?.let {
+                elementsConfigured
+                    ?.find { it.tag == tag }
+                    ?: customElements.find { it.tag == tag }
+            }
 
 }

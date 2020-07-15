@@ -50,17 +50,41 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
 
     private val instrumentation = TrapdoorInstrumentation.obtain()
 
+    /**
+     * Enable http-request log print by default-implementation
+     */
     fun enableHttpLog(): Trapdoor {
         clientBuilder.addNetworkInterceptor(NetworkTrafficLogInterceptor())
         return this
     }
 
+    /**
+     * Get all [HostElement] configured as a read-only [List]
+     */
     fun elements(): List<HostElement> {
         return instrumentation.hostElements()
     }
 
+    /**
+     * Generate the final [Call.Factory] for requests
+     */
     fun factory(): Call.Factory {
         return HttpCallFactoryProxy.create(source, instrumentation)
+    }
+
+    /**
+     * Retrieves current [HostElement] selected
+     */
+    fun host(): HostElement? = instrumentation.currentHost()
+
+    /**
+     * Change select host by [HostElement.tag]
+     */
+    fun select(tag: String) {
+        tag.takeIf { it.isNotEmpty() }
+            ?.also {
+                instrumentation.pick(it)
+            }
     }
 
 }

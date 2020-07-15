@@ -23,6 +23,7 @@
 package me.alvince.android.httptrapdoor.util
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import me.alvince.android.httptrapdoor.BuildConfig
 import me.alvince.android.httptrapdoor.HostElement
 import me.alvince.android.httptrapdoor.TrapdoorLogger
@@ -36,11 +37,12 @@ import java.io.IOException
  *
  * @author alvince.zy@gmail.com
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 internal class ConfigParser {
 
     fun parse(context: Context): List<HostElement> {
         return try {
-            context.assets.open("trapdoor_host_config.cfg")
+            context.assets.open("trapdoor_host_config.txt")
         } catch (ex: IOException) {
             TrapdoorLogger.e("Fail to parse host config", ex)
             null
