@@ -1,3 +1,4 @@
 rootProject.name = "HttpTrapdoor"
 include ':libtrapdoor'
+include ':trapdoor-buoy'
 include ':sample'
