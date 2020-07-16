@@ -46,15 +46,25 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
         }
     }
 
-    private val clientBuilder = source.newBuilder()
-
     private val instrumentation = TrapdoorInstrumentation.obtain()
+    private val options = Options()
+
+    /**
+     * Config custom extension [HostElement] elements for this [Trapdoor] only
+     */
+    fun customConfig(vararg elements: HostElement): Trapdoor {
+        elements.takeIf { it.isNotEmpty() }
+            ?.also {
+                instrumentation.extensionalConfig(it)
+            }
+        return this
+    }
 
     /**
      * Enable http-request log print by default-implementation
      */
     fun enableHttpLog(): Trapdoor {
-        clientBuilder.addNetworkInterceptor(NetworkTrafficLogInterceptor())
+        options.withLog = true
         return this
     }
 
@@ -69,7 +79,13 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
      * Generate the final [Call.Factory] for requests
      */
     fun factory(): Call.Factory {
-        return HttpCallFactoryProxy.create(source, instrumentation)
+        return source.newBuilder().apply {
+            if (options.withLog) {
+                addNetworkInterceptor(NetworkTrafficLogInterceptor())
+            }
+        }.let {
+            HttpCallFactoryProxy.create(it.build(), instrumentation)
+        }
     }
 
     /**
@@ -85,6 +101,11 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
             ?.also {
                 instrumentation.pick(it)
             }
+    }
+
+
+    private class Options {
+        var withLog: Boolean = false
     }
 
 }

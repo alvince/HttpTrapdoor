@@ -33,6 +33,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:${getProperty('androidx.constraintlayout')}"
     implementation "androidx.startup:startup-runtime:${getProperty('androidx.startup')}"
     implementation "com.squareup.okhttp3:okhttp:${getProperty('lib.square.okhttp')}"
+    implementation "com.squareup.retrofit2:retrofit:${getProperty('lib.square.retrofit')}"
     implementation project(':libtrapdoor')
 
     testImplementation "junit:junit:${getProperty('lib.junit')}"

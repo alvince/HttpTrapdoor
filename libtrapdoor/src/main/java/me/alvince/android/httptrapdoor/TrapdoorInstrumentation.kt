@@ -67,6 +67,18 @@ internal class TrapdoorInstrumentation private constructor() {
 
     fun hostElements() = (elementsConfigured?.toList() ?: emptyList()) + customElements
 
+    internal fun extensionalConfig(elements: Array<out HostElement>) {
+        elements.takeIf { it.isNotEmpty() }
+            ?.forEach { element ->
+                customElements.indexOf(element)
+                    .takeIf { it != -1 }
+                    ?.also {
+                        customElements[it] = element
+                    }
+                    ?: customElements.add(element)
+            }
+    }
+
     internal fun checkHostConfigured(host: String): Boolean {
         if (host.isEmpty()) {
             return false
