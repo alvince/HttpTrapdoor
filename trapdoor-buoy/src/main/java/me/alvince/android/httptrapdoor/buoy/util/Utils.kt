@@ -25,7 +25,13 @@ package me.alvince.android.httptrapdoor.buoy.util
 
 import android.content.Context
 import android.util.TypedValue
+import android.widget.TextView
 import androidx.annotation.RestrictTo
 
 fun Context.dipOf(dipValue: Float): Float =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, resources.displayMetrics)
+
+fun TextView.indicateHost(label: String?) {
+    val text = if (label.isNullOrEmpty()) "N" else label.trim()
+    this.text = text
+}

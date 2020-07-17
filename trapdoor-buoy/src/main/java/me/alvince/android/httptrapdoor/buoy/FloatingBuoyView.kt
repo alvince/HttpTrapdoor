@@ -38,9 +38,12 @@ import androidx.core.view.ViewCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import me.alvince.android.httptrapdoor.buoy.util.dipOf
 import kotlin.math.min
 
 /**
+ * Built-in [TrapdoorBuoy] floating indicator [AppCompatTextView]
+ *
  * Created by alvince on 2020/7/16
  *
  * @author alvince.zy@gmail.com
@@ -66,10 +69,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     init {
         id = indicatorViewId
-        background = BuoyBackgroundDrawable()
+        background = BuoyBackgroundDrawable(context.dipOf(4F).toInt())
         gravity = Gravity.CENTER
         setTextColor(Color.WHITE)
-        text = "N"
     }
 
     @UiThread
@@ -99,7 +101,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
 }
 
-private class BuoyBackgroundDrawable : Drawable() {
+private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
     private val paint = Paint()
         .apply {
             color = 0x33000000
@@ -107,11 +109,16 @@ private class BuoyBackgroundDrawable : Drawable() {
         }
 
     override fun draw(canvas: Canvas) {
-        bounds.takeIf { it.width() > 0 && it.height() > 0 }
+        bounds.takeIf { min(it.width(), it.height()) > insets.times(2) }
             ?.also {
                 val w = it.width()
                 val h = it.height()
-                canvas.drawCircle(w.div(2F), h.div(2F), min(w, h).div(2F), paint)
+                canvas.drawCircle(
+                    w.div(2F),
+                    h.div(2F),
+                    min(w, h).div(2F).minus(insets),
+                    paint
+                )
             }
     }
 

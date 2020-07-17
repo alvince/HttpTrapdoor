@@ -25,8 +25,8 @@ package me.alvince.android.httptrapdoor
 import android.util.Log
 import androidx.annotation.RestrictTo
 
-@RestrictTo(RestrictTo.Scope.LIBRARY)
-internal class TrapdoorLogger {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class TrapdoorLogger {
 
     companion object {
         fun i(message: String) {

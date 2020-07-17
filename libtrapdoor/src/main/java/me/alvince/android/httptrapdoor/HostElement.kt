@@ -35,7 +35,7 @@ data class HostElement(
     /**
      * the user-visible host desc
      */
-    val name: String,
+    val label: String,
     /**
      * the unique tag of host element
      */
@@ -47,7 +47,7 @@ data class HostElement(
     /**
      * the scheme of host element
      *
-     * can be `http` or `https`
+     * can be `http` or `https`, default `https`
      */
     var scheme: String = "https"
 
@@ -55,8 +55,10 @@ data class HostElement(
 
     val port: Int get() = TcpPortHolder.port(scheme)
 
+    val url: String get() = "$scheme://$host"
+
     override fun toString(): String {
-        return "HostElement(name='$name', tag='$tag', host_url='$scheme://$host')"
+        return "HostElement(label='$label', tag='$tag', host_url='$url')"
     }
 
     override fun equals(other: Any?): Boolean {

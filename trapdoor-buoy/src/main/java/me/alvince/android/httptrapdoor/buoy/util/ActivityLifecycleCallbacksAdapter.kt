@@ -1,4 +1,4 @@
-package me.alvince.android.httptrapdoor.buoy
+package me.alvince.android.httptrapdoor.buoy.util
 
 import android.app.Activity
 import android.app.Application

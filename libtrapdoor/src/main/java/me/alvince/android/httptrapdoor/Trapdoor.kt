@@ -22,6 +22,7 @@
 
 package me.alvince.android.httptrapdoor
 
+import android.util.SparseArray
 import me.alvince.android.httptrapdoor.okhttp.HttpCallFactoryProxy
 import me.alvince.android.httptrapdoor.okhttp.interceptor.NetworkTrafficLogInterceptor
 import okhttp3.Call
@@ -41,9 +42,15 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
     companion object {
         const val TRAPDOOR_TAG = "Trapdoor"
 
-        fun with(client: OkHttpClient): Trapdoor {
-            return Trapdoor(client)
-        }
+        private val cTrapdoorPool = SparseArray<Trapdoor>()
+
+        fun with(client: OkHttpClient): Trapdoor =
+            client.hashCode().let { key ->
+                synchronized(this) {
+                    cTrapdoorPool[key]
+                        ?: Trapdoor(client).also { cTrapdoorPool.put(key, it) }
+                }
+            }
     }
 
     private val instrumentation = TrapdoorInstrumentation.obtain()
@@ -83,8 +90,13 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
             if (options.withLog) {
                 addNetworkInterceptor(NetworkTrafficLogInterceptor())
             }
-        }.let {
-            HttpCallFactoryProxy.create(it.build(), instrumentation)
+        }.let { builder ->
+            HttpCallFactoryProxy.create(builder.build(), instrumentation)
+                .also {
+                    if (BuildConfig.DEBUG) {
+                        TrapdoorLogger.i("Create call-factory: $it by trapdoor{$this} with instrumentation{$instrumentation} ")
+                    }
+                }
         }
     }
 
@@ -99,8 +111,20 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
     fun select(tag: String) {
         tag.takeIf { it.isNotEmpty() }
             ?.also {
+                if (BuildConfig.DEBUG) {
+                    TrapdoorLogger.i("select host [$tag] by instrumentation{$instrumentation} from {$this}")
+                }
                 instrumentation.pick(it)
             }
+    }
+
+    fun release() {
+        instrumentation.clear()
+        cTrapdoorPool.apply {
+            indexOfValue(this@Trapdoor)
+                .takeIf { it != -1 }
+                ?.also { removeAt(it) }
+        }
     }
 
 

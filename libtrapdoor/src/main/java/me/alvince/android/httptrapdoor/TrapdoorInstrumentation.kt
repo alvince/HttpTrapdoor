@@ -65,7 +65,7 @@ internal class TrapdoorInstrumentation private constructor() {
      */
     private var customElements = mutableListOf<HostElement>()
 
-    fun hostElements() = (elementsConfigured?.toList() ?: emptyList()) + customElements
+    fun hostElements() = customElements + (elementsConfigured?.toList() ?: emptyList())
 
     internal fun extensionalConfig(elements: Array<out HostElement>) {
         elements.takeIf { it.isNotEmpty() }
@@ -95,6 +95,11 @@ internal class TrapdoorInstrumentation private constructor() {
     internal fun pick(hostTag: String) {
         hostTag.takeIf { it != currentHostTag }
             ?.also { currentHostTag = it }
+    }
+
+    internal fun clear() {
+        customElements.clear()
+        currentHostTag = ""
     }
 
     private fun getElementByTag(tag: String): HostElement? =
