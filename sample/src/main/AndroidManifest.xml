@@ -20,9 +20,8 @@
 
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="me.alvince.android.httptrapdoor.sample.provider.startup"
-            android:exported="false"
-            tools:replace="android:authorities">
+            android:authorities="me.alvince.android.httptrapdoor.sample.androidx-startup"
+            android:exported="false">
             <meta-data
                 android:name="me.alvince.android.httptrapdoor.StartupInitializer"
                 android:value="androidx.startup" />

@@ -1,18 +1,16 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
-    id 'kotlin-android-extensions'
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "30.0.0"
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 30
+        versionCode getProperty('lib.version.code') as int
+        versionName getProperty('lib.version.name')
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -34,9 +32,41 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${getProperty('androidx.appcompat')}"
 
     api project(':libtrapdoor')
+//    api "me.alvince.android.httptrapdoor:trapdoor:0.0.1"
 
     testImplementation 'junit:junit:4.12'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
+
+ext {
+    def version = getProperty('lib.version.name')
+
+    bintrayRepo = getProperty('lib.repo')
+    bintrayName = getProperty('lib.repo.project')
+
+    group_id = getProperty('lib.group')
+    artifact_id = getProperty('lib.artifact')
+
+    libraryName = getProperty('lib.name')
+    libraryVersion = version
+    libraryDescription = getProperty('lib.desc')
+    siteUrl = getProperty('lib.website')
+    gitUrl = getProperty('lib.vcs')
+    revisionTag = version
+
+    developerId = getProperty('developer.id')
+    developerName = getProperty('developer.name')
+    developerEmail = getProperty('developer.email')
+
+    licenseName = 'MIT License'
+    licenseUrl = 'https://choosealicense.com/licenses/mit/'
+    allLicenses = ['MIT']
+}
+
+group = group_id
+version = libraryVersion
+
+apply from: '../gradle/maven_install.gradle'
+apply from: '../gradle/bintray_upload.gradle'
