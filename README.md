@@ -14,9 +14,12 @@ Add into `build.gradle` of app module
 ```groovy
 dependencies {
     …
+    // [Required] core lib
     implementation "me.alvince.android.httptrapdoor:trapdoor:0.0.1"
-    //use default floating-buoy
-    //implementation "me.alvince.android.httptrapdoor:trapdoor-buoy:0.0.1"
+    // [Optional] enable auto-config
+    implementation "androidx.startup:startup-runtime:1.0.0-alpha01"
+    // [Optional] use default floating-buoy
+    implementation "me.alvince.android.httptrapdoor:trapdoor-buoy:0.0.1"
     …
 }
 ```
@@ -37,7 +40,9 @@ retrofit = Retrofit.Builder()
     .callFactory(client)
 ```
 
-配置服务器列表
+### 配置服务器列表
+
+配置服务器列表（支持自动/手动配置）
 
 #### 自动配置
 
@@ -70,6 +75,14 @@ app assets 目录下添加文件 `trapdoor_host_config.txt`
 // 对当前 trapdoor 实例配置服务器
 trapdoor.customConfig(…)
 ```
+
+### 切换服务器
+
+```Kotlin
+// 根据配置的服务器标签选择
+trapdoor.select(hostTag)
+```
+选择服务器之后，由对应 `trapdoor` 驱动的网络请求会自动根据配置替换请求域名
 
 ### 悬浮指示器
 
