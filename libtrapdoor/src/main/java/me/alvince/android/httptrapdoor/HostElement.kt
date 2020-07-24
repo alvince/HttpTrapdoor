@@ -22,6 +22,7 @@
 
 package me.alvince.android.httptrapdoor
 
+import androidx.annotation.RestrictTo
 import me.alvince.android.httptrapdoor.util.TcpPortHolder
 
 /**
@@ -31,7 +32,7 @@ import me.alvince.android.httptrapdoor.util.TcpPortHolder
  *
  * @author alvince.zy@gmail.com
  */
-data class HostElement(
+class HostElement(
     /**
      * the user-visible host desc
      */
@@ -49,7 +50,11 @@ data class HostElement(
      *
      * can be `http` or `https`, default `https`
      */
-    var scheme: String = "https"
+    var scheme: String = "https",
+    /**
+     * element type: `url` or `dns`, default `url`
+     */
+    type: String = "url"
 
 ) {
 
@@ -57,8 +62,20 @@ data class HostElement(
 
     val url: String get() = "$scheme://$host"
 
+    val hostType: HostType = when (type) {
+        "dns" -> HostType.DNS
+        "url" -> HostType.URL
+        else -> HostType.URL
+    }
+
+    /**
+     * IP address string
+     */
+    var inetAddress: String = ""
+        internal set
+
     override fun toString(): String {
-        return "HostElement(label='$label', tag='$tag', host_url='$url')"
+        return "HostElement(type='${hostType.name}', label='$label', tag='$tag', host_url='$url', ip='$inetAddress')"
     }
 
     override fun equals(other: Any?): Boolean {
@@ -74,4 +91,17 @@ data class HostElement(
 
     override fun hashCode(): Int = tag.hashCode()
 
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+enum class HostType {
+    /**
+     *
+     */
+    URL,
+
+    /**
+     *
+     */
+    DNS
 }

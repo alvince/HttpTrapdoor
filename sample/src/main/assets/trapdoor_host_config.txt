@@ -1,3 +1,7 @@
-开发,dev,dev.github.com,https
-测试,test,test.github.com,https
-生产,prod,github.com,https
+开发,dev,dev.github.com,https,url
+测试,test,www.github.com,https,url
+生产,prod,github.com,https,url
+
+## sample: dns mode
+开发-dns,dev,d.github.com,https,dns:185.199.108.153
+测试-dns,test,d.github.com,https,dns:13.229.188.59

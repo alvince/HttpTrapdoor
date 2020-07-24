@@ -24,6 +24,7 @@ package me.alvince.android.httptrapdoor
 
 import android.util.SparseArray
 import me.alvince.android.httptrapdoor.okhttp.HttpCallFactoryProxy
+import me.alvince.android.httptrapdoor.okhttp.dns.FacileDns
 import me.alvince.android.httptrapdoor.okhttp.interceptor.NetworkTrafficLogInterceptor
 import okhttp3.Call
 import okhttp3.OkHttpClient
@@ -87,6 +88,7 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
      */
     fun factory(): Call.Factory {
         return source.newBuilder().apply {
+            dns(FacileDns(source.dns(), instrumentation))
             if (options.withLog) {
                 addNetworkInterceptor(NetworkTrafficLogInterceptor())
             }

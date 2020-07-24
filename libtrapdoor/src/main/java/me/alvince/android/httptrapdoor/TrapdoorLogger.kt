@@ -25,12 +25,17 @@ package me.alvince.android.httptrapdoor
 import android.util.Log
 import androidx.annotation.RestrictTo
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class TrapdoorLogger {
 
     companion object {
         fun i(message: String) {
             Log.i(Trapdoor.TRAPDOOR_TAG, message)
+        }
+
+        fun iIfDebug(message: String) {
+            message.takeIf { BuildConfig.DEBUG }
+                ?.also { i(it) }
         }
 
         fun e(message: String, error: Throwable?) {

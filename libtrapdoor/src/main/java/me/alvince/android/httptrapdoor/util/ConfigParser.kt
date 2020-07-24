@@ -24,11 +24,13 @@ package me.alvince.android.httptrapdoor.util
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import me.alvince.android.httptrapdoor.BuildConfig
 import me.alvince.android.httptrapdoor.HostElement
+import me.alvince.android.httptrapdoor.HostType
 import me.alvince.android.httptrapdoor.TrapdoorLogger
+import me.alvince.android.httptrapdoor.annotation.IoThread
 import okio.Okio
 import java.io.IOException
+import java.util.*
 
 /**
  * Static configuration parser on start-up
@@ -40,6 +42,9 @@ import java.io.IOException
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 internal class ConfigParser {
 
+    private val allowListOfHostType = arrayOf("url", "dns")
+
+    @IoThread
     fun parse(context: Context): List<HostElement> {
         return try {
             context.assets.open("trapdoor_host_config.txt")
@@ -63,18 +68,63 @@ internal class ConfigParser {
                 }
             }
         }
-            ?.filter { it.isNotEmpty() }
+            ?.filter { it.isNotEmpty() && !(it.startsWith("#") or it.startsWith("//")) }
             ?.mapNotNull {
-                if (BuildConfig.DEBUG) {
-                    TrapdoorLogger.i(it)
-                }
-                it.split(",")
-                    .takeIf { sections -> sections.size >= 4 }
-                    ?.let { sections ->
-                        HostElement(sections[0], sections[1], sections[2], sections[3])
+                TrapdoorLogger.iIfDebug(it)
+                parseLine(it)
+            }
+            ?.also { elements ->
+                elements.filter { it.hostType == HostType.DNS }
+                    .forEach {
+
                     }
             }
             ?: emptyList()
+    }
+
+    /**
+     * content should match that below
+     * ```
+     * {label},{tag},{host-url},{host-schema:http|https},{type:url|dns}
+     * ```
+     */
+    private fun parseLine(content: String): HostElement? {
+        return content.takeIf { it.isNotEmpty() }
+            ?.split(",")
+            ?.let { sections ->
+                when (sections.size) {
+                    4 -> {
+                        HostElement(sections[0], sections[1], sections[2], sections[3])
+                    }
+                    5 -> {
+                        sections[4].toLowerCase(Locale.getDefault())
+                            .let {
+                                if (allowListOfHostType.contains(it)) {
+                                    it
+                                } else {
+                                    "url"
+                                }
+                            }
+                            .let { type ->
+                                HostElement(
+                                    sections[0],
+                                    sections[1],
+                                    sections[2],
+                                    sections[3],
+                                    type
+                                )
+                            }
+                    }
+                    else -> {
+                        if (sections.size == 3) {
+                            HostElement(sections[0], sections[1], sections[2])
+                        } else {
+                            TrapdoorLogger.e("Invalid config line: $content", null)
+                            null
+                        }
+                    }
+                }
+            }
     }
 
 }
