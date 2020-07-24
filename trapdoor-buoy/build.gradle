@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion getProperty('project.android.compile') as int
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 30
+        minSdkVersion getProperty('project.android.min') as int
+        targetSdkVersion getProperty('project.android.target') as int
         versionCode getProperty('lib.version.code') as int
-        versionName getProperty('lib.version.name')
+        versionName getProperty('trapdoor.lib.version')
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -41,7 +41,7 @@ dependencies {
 }
 
 ext {
-    def version = getProperty('lib.version.name')
+    def version = getProperty('trapdoor.lib.version')
 
     bintrayRepo = getProperty('lib.repo')
     bintrayName = getProperty('lib.repo.project')

@@ -45,6 +45,7 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
 
         private val cTrapdoorPool = SparseArray<Trapdoor>()
 
+        @JvmStatic
         fun with(client: OkHttpClient): Trapdoor =
             client.hashCode().let { key ->
                 synchronized(this) {

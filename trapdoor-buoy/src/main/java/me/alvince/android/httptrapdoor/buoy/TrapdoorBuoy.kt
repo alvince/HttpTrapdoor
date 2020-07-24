@@ -54,6 +54,7 @@ class TrapdoorBuoy(private val trapdoor: Trapdoor) {
     companion object {
         private val cTrapdoorBuoyPool = SparseArray<TrapdoorBuoy>()
 
+        @JvmStatic
         fun with(trapdoor: Trapdoor): TrapdoorBuoy =
             trapdoor.hashCode().let { key ->
                 synchronized(this) {
