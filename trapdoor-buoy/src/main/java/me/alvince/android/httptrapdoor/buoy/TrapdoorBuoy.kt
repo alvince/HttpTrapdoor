@@ -36,6 +36,8 @@ import android.widget.SimpleAdapter
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import me.alvince.android.httptrapdoor.HostElement
+import me.alvince.android.httptrapdoor.HostType
 import me.alvince.android.httptrapdoor.Trapdoor
 import me.alvince.android.httptrapdoor.TrapdoorLogger
 import me.alvince.android.httptrapdoor.buoy.util.ActivityLifecycleCallbacksAdapter
@@ -183,7 +185,7 @@ class TrapdoorBuoy(private val trapdoor: Trapdoor) {
             ?.let { elements ->
                 mutableListOf<Map<String, String>>().apply {
                     elements.forEach {
-                        add(mapOf("label" to it.label, "content" to "${it.tag} - ${it.url}"))
+                        add(mapOf("label" to it.buoyLabel, "content" to it.buoyContent))
                     }
                 }
             }
@@ -211,6 +213,12 @@ class TrapdoorBuoy(private val trapdoor: Trapdoor) {
             }
             ?.show()
     }
+
+    private val HostElement.buoyLabel: String
+        get() = if (hostType == HostType.DNS) "$label:dns" else label
+
+    private val HostElement.buoyContent: String
+        get() = if (hostType == HostType.DNS) "$tag - $inetAddress" else "$tag - $url"
 
 }
 
