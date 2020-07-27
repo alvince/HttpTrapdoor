@@ -28,7 +28,12 @@ import me.alvince.android.httptrapdoor.HostElement
 import me.alvince.android.httptrapdoor.TrapdoorLogger
 import me.alvince.android.httptrapdoor.annotation.IoThread
 import okio.Okio
+import org.json.JSONArray
+import org.json.JSONException
+import org.json.JSONObject
 import java.io.IOException
+import java.io.InputStream
+import java.nio.charset.Charset
 import java.util.*
 
 /**
@@ -48,34 +53,70 @@ internal class ConfigParser {
 
     @IoThread
     fun parse(context: Context): List<HostElement> {
-        return try {
-            context.assets.open("trapdoor_host_config.txt")
+        var elements = try {
+            context.assets.open("trapdoor_host_config.json")
         } catch (ex: IOException) {
-            TrapdoorLogger.e("Fail to parse host config", ex)
+            TrapdoorLogger.e("Fail to parse host config json", ex)
             null
         }?.let {
-            mutableListOf<String>().apply {
-                Okio.buffer(Okio.source(it)).use { buffer ->
-                    var tmp: String?
-                    try {
-                        do {
-                            tmp = buffer.readUtf8Line()
-                            tmp?.takeIf { it.isNotEmpty() }
-                                ?.also { add(it) }
-                        } while (!tmp.isNullOrEmpty())
-                    } catch (ex: IOException) {
-                        // interrupt load
-                        TrapdoorLogger.e("Read config error.", ex)
-                    }
+            Okio.buffer(Okio.source(it)).use { buffer ->
+                val text = buffer.readString(Charset.defaultCharset())
+                JSONArray(text)
+            }.let { json -> parseJson(json) }
+        }
+
+        if (elements.isNullOrEmpty()) {
+            elements = try {
+                context.assets.open("trapdoor_host_config.txt")
+            } catch (ex: IOException) {
+                TrapdoorLogger.e("Fail to parse host config", ex)
+                null
+            }?.let { parsePlain(it) }
+        }
+
+        return elements ?: emptyList()
+    }
+
+    fun parseJson(src: JSONArray): List<HostElement> {
+        return src.let {
+            mutableListOf<JSONObject>().apply {
+                for (pos in 0 until src.length()) {
+                    add(src.optJSONObject(pos))
                 }
             }
         }
-            ?.filter { it.isNotEmpty() && !(it.startsWith("#") or it.startsWith("//")) }
-            ?.mapNotNull {
+            .takeIf { it.isNotEmpty() }
+            ?.mapNotNull { json ->
+                try {
+                    json.toHostElement()
+                } catch (ex: IllegalArgumentException) {
+                    null
+                }
+            }
+            ?: emptyList()
+    }
+
+    private fun parsePlain(input: InputStream): List<HostElement> {
+        return mutableListOf<String>().apply {
+            Okio.buffer(Okio.source(input)).use { buffer ->
+                var tmp: String?
+                try {
+                    do {
+                        tmp = buffer.readUtf8Line()
+                        tmp?.takeIf { it.isNotEmpty() }
+                            ?.also { add(it.trim()) }
+                    } while (!tmp.isNullOrEmpty())
+                } catch (ex: IOException) {
+                    // interrupt load
+                    TrapdoorLogger.e("Read config error.", ex)
+                }
+            }
+        }
+            .filter { it.isNotEmpty() && !(it.startsWith("#") or it.startsWith("//")) }
+            .mapNotNull {
                 TrapdoorLogger.iIfDebug(it)
                 parseLine(it)
             }
-            ?: emptyList()
     }
 
     /**
@@ -127,6 +168,43 @@ internal class ConfigParser {
                         }
                     }
                 }
+            }
+    }
+
+    private fun JSONObject.toHostElement(): HostElement? {
+        val label = this.optString("label")
+        val tag = this.optString("tag")
+        val host = this.optString("host")
+        val scheme = this.optString("scheme", "http")
+        var mode = this.optString("mode", "url")
+
+        require(label.isNotEmpty() && tag.isNotEmpty() && host.isNotEmpty()) { "Illegal json-element: $this" }
+
+        var inetAddresses = arrayOf("")
+        if (mode == "dns") {
+            val ipList = try {
+                this.getJSONArray("inet").let { array ->
+                    mutableListOf<String>().apply {
+                        for (pos in 0 until array.length()) {
+                            val ele = array.getString(pos)
+                            if (ele.matches(regexIp4Pattern)) {
+                                add(ele)
+                            }
+                        }
+                    }
+                }
+            } catch (ex: JSONException) {
+                emptyList<String>()
+            }
+            if (ipList.isEmpty()) {
+                mode = "url"
+            } else {
+                inetAddresses = ipList.toTypedArray()
+            }
+        }
+        return HostElement(label, tag, host, scheme, mode)
+            .apply {
+                inetAddress = inetAddresses[0]
             }
     }
 

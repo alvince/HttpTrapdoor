@@ -1,0 +1,14 @@
+[
+  {
+    "label": "test1",
+    "tag": "aaa",
+    "host": "www.baidu.com",
+    "scheme": "https",
+  },
+  {
+    "label": "test2",
+    "tag": "bbb",
+    "host": "www.baidu2.com",
+    "scheme": "http"
+  }
+]

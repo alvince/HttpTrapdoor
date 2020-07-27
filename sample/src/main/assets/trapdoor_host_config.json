@@ -1,0 +1,24 @@
+[
+  {
+    "label": "开发",
+    "tag": "dev",
+    "host": "d.github.com",
+    "scheme": "https"
+  },
+  {
+    "label": "测试",
+    "tag": "test",
+    "host": "www.github.com",
+    "scheme": "https"
+  },
+  {
+    "label": "开发-dns",
+    "tag": "dev-dns",
+    "host": "d.github.com",
+    "scheme": "https",
+    "mode": "dns",
+    "inet": [
+      "185.199.108.153"
+    ]
+  }
+]
