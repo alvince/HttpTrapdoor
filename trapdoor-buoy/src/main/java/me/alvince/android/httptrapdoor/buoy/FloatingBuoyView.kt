@@ -25,6 +25,7 @@ package me.alvince.android.httptrapdoor.buoy
 import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.ViewConfiguration
@@ -77,7 +78,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
     @UiThread
     internal fun attach() {
         floatAttrs?.also {
-            val wm = ContextCompat.getSystemService(context, WindowManager::class.java) as WindowManager
+            val wm =
+                ContextCompat.getSystemService(context, WindowManager::class.java) as WindowManager
             if (attached) {
                 wm.updateViewLayout(this, it)
             } else {
@@ -102,23 +104,26 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 }
 
 private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
+
+    enum class BuoyDirection {
+        LEFT, RIGHT
+    }
+
     private val paint = Paint()
         .apply {
             color = 0x33000000
             style = Paint.Style.FILL_AND_STROKE
         }
 
+    private val bgPath = Path()
+    private var compatCornerRectF = RectF()
+
+    private var direction = BuoyDirection.LEFT
+
     override fun draw(canvas: Canvas) {
         bounds.takeIf { min(it.width(), it.height()) > insets.times(2) }
             ?.also {
-                val w = it.width()
-                val h = it.height()
-                canvas.drawCircle(
-                    w.div(2F),
-                    h.div(2F),
-                    min(w, h).div(2F).minus(insets),
-                    paint
-                )
+                innerDraw(canvas, it.width().toFloat(), it.height().toFloat(), paint, direction)
             }
     }
 
@@ -134,6 +139,53 @@ private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
 
     override fun setColorFilter(colorFilter: ColorFilter?) {
         paint.colorFilter = colorFilter
+    }
+
+    private fun innerDraw(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        paint: Paint,
+        direction: BuoyDirection
+    ) {
+        bgPath.apply {
+            reset()
+            val cornerRadius = height.div(2F)
+            if (direction == BuoyDirection.LEFT) {
+                moveTo(0F, 0F)
+                lineTo(0F, height)
+                lineTo(width - cornerRadius, height)
+                arcToCompat(0F, 0F, height, height, 90F, -90F)
+                close()
+            } else {
+                moveTo(width, 0F)
+                lineTo(width, height)
+                lineTo(cornerRadius, height)
+                arcToCompat(0F, 0F, height, height, 90F, 270F)
+                close()
+            }
+        }.also {
+            canvas.drawPath(it, paint)
+        }
+    }
+
+    private fun Path.arcToCompat(
+        left: Float,
+        top: Float,
+        right: Float,
+        bottom: Float,
+        startAngle: Float,
+        sweepAngle: Float
+    ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            arcTo(0F, 0F, 0F, 0F, startAngle, sweepAngle, false)
+        } else {
+            compatCornerRectF.apply {
+                set(left, top, right, bottom)
+            }.also { rectF ->
+                arcTo(rectF, startAngle, sweepAngle)
+            }
+        }
     }
 
 }
