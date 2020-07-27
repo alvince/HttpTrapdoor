@@ -48,17 +48,19 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:3.2.0"
 }
 
+def snapshot = Boolean.parseBoolean(getProperty('trapdoor.snapshot'))
+
 ext {
     def version = getProperty('trapdoor.lib.version')
 
     bintrayRepo = getProperty('lib.repo')
     bintrayName = getProperty('lib.repo.project')
 
-    group_id = getProperty('lib.group')
+    group_id = snapshot ? 'com.github.alvince.HttpTrapdoor' : getProperty('lib.group')
     artifact_id = getProperty('lib.artifact')
 
     libraryName = getProperty('lib.name')
-    libraryVersion = version
+    libraryVersion = snapshot ? "$version-SNAPSHOT" : version
     libraryDescription = getProperty('lib.desc')
     siteUrl = getProperty('lib.website')
     gitUrl = getProperty('lib.vcs')
@@ -75,6 +77,11 @@ ext {
 
 group = group_id
 version = libraryVersion
+
+if (snapshot) {
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+}
 
 apply from: '../gradle/maven_install.gradle'
 apply from: '../gradle/bintray_upload.gradle'

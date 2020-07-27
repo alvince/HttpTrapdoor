@@ -77,7 +77,7 @@ internal class ConfigParser {
         return elements ?: emptyList()
     }
 
-    fun parseJson(src: JSONArray): List<HostElement> {
+    private fun parseJson(src: JSONArray): List<HostElement> {
         return src.let {
             mutableListOf<JSONObject>().apply {
                 for (pos in 0 until src.length()) {
