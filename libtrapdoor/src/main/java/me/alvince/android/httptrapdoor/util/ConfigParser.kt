@@ -25,7 +25,6 @@ package me.alvince.android.httptrapdoor.util
 import android.content.Context
 import androidx.annotation.RestrictTo
 import me.alvince.android.httptrapdoor.HostElement
-import me.alvince.android.httptrapdoor.HostType
 import me.alvince.android.httptrapdoor.TrapdoorLogger
 import me.alvince.android.httptrapdoor.annotation.IoThread
 import okio.Okio
@@ -43,6 +42,9 @@ import java.util.*
 internal class ConfigParser {
 
     private val allowListOfHostType = arrayOf("url", "dns")
+
+    private val regexIp4Pattern =
+        Regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\$")
 
     @IoThread
     fun parse(context: Context): List<HostElement> {
@@ -73,19 +75,13 @@ internal class ConfigParser {
                 TrapdoorLogger.iIfDebug(it)
                 parseLine(it)
             }
-            ?.also { elements ->
-                elements.filter { it.hostType == HostType.DNS }
-                    .forEach {
-
-                    }
-            }
             ?: emptyList()
     }
 
     /**
      * content should match that below
      * ```
-     * {label},{tag},{host-url},{host-schema:http|https},{type:url|dns}
+     * {label},{tag},{host-url},{host-schema:`http`|`https`},{type-data:`url`|`dns:ip-address`}
      * ```
      */
     private fun parseLine(content: String): HostElement? {
@@ -99,20 +95,27 @@ internal class ConfigParser {
                     5 -> {
                         sections[4].toLowerCase(Locale.getDefault())
                             .let {
-                                if (allowListOfHostType.contains(it)) {
-                                    it
+                                val slices = it.split(":")
+                                if (allowListOfHostType.contains(slices[1]) &&
+                                    (slices[0] == "dns").and(slices[1].matches(regexIp4Pattern))
+                                ) {
+                                    ModeSlice(slices[0], slices[1])
                                 } else {
-                                    "url"
+                                    ModeSlice("url", "")
                                 }
                             }
-                            .let { type ->
+                            .let { typeData ->
                                 HostElement(
                                     sections[0],
                                     sections[1],
                                     sections[2],
                                     sections[3],
-                                    type
-                                )
+                                    typeData.mode
+                                ).apply {
+                                    if (typeData.data.isNotEmpty()) {
+                                        inetAddress = typeData.data
+                                    }
+                                }
                             }
                     }
                     else -> {
@@ -126,5 +129,7 @@ internal class ConfigParser {
                 }
             }
     }
+
+    private class ModeSlice(val mode: String, val data: String)
 
 }
