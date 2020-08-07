@@ -159,11 +159,8 @@ class TrapdoorBuoy(private val trapdoor: Trapdoor) {
             type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL
             flags = flags.or(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
             format = PixelFormat.TRANSLUCENT
-            activity.dipOf(44F).toInt()
-                .also {
-                    width = it
-                    height = it
-                }
+            width = activity.dipOf(72F).toInt()
+            height = WindowManager.LayoutParams.WRAP_CONTENT
             gravity = Gravity.START.or(Gravity.TOP)
             y = activity.dipOf(96F).toInt()
         }.let { floatLp ->
@@ -172,6 +169,9 @@ class TrapdoorBuoy(private val trapdoor: Trapdoor) {
                     alertHostListSelections(it)
                 }
                 floatAttrs = floatLp
+                val horizPadding = activity.dipOf(2F).toInt()
+                val verticalPadding = activity.dipOf(4F).toInt()
+                setPaddingRelative(horizPadding, verticalPadding, horizPadding, verticalPadding)
             }
         }
     }

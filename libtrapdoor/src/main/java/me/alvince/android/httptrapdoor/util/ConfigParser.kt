@@ -56,7 +56,7 @@ internal class ConfigParser {
         var elements = try {
             context.assets.open("trapdoor_host_config.json")
         } catch (ex: IOException) {
-            TrapdoorLogger.e("Fail to parse host config json", ex)
+            TrapdoorLogger.w("Fail to parse host config json", ex)
             null
         }?.let {
             Okio.buffer(Okio.source(it)).use { buffer ->
@@ -69,9 +69,12 @@ internal class ConfigParser {
             elements = try {
                 context.assets.open("trapdoor_host_config.txt")
             } catch (ex: IOException) {
-                TrapdoorLogger.e("Fail to parse host config", ex)
+                TrapdoorLogger.w("Fail to parse host config", ex)
                 null
-            }?.let { parsePlain(it) }
+            }?.let {
+                TrapdoorLogger.w("Config `trapdoor_host_config.txt` obsoleted, should provide `trapdoor_host_config.json` instead.")
+                parsePlain(it)
+            }
         }
 
         return elements ?: emptyList()

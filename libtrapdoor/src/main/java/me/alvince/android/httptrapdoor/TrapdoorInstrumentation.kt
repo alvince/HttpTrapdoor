@@ -38,7 +38,7 @@ internal class TrapdoorInstrumentation private constructor() {
         /**
          * Global elements configured
          */
-        private var elementsConfigured: List<HostElement>? = null
+        private var globalElementsConfigured: List<HostElement>? = null
 
         internal fun obtain(): TrapdoorInstrumentation {
             return TrapdoorInstrumentation()
@@ -48,7 +48,7 @@ internal class TrapdoorInstrumentation private constructor() {
             if (elements.isEmpty()) {
                 return
             }
-            elementsConfigured = elements
+            globalElementsConfigured = elements
                 .also {
                     if (BuildConfig.DEBUG) {
                         TrapdoorLogger.i(it.contentToString())
@@ -65,7 +65,7 @@ internal class TrapdoorInstrumentation private constructor() {
      */
     private var customElements = mutableListOf<HostElement>()
 
-    fun hostElements() = customElements + (elementsConfigured?.toList() ?: emptyList())
+    fun hostElements() = customElements + (globalElementsConfigured?.toList() ?: emptyList())
 
     internal fun extensionalConfig(elements: Array<out HostElement>) {
         elements.takeIf { it.isNotEmpty() }
@@ -92,10 +92,13 @@ internal class TrapdoorInstrumentation private constructor() {
             ?.let { getElementByTag(it) }
     }
 
-    internal fun pick(hostTag: String) {
+    internal fun pick(hostTag: String): Boolean =
         hostTag.takeIf { it != currentHostTag }
-            ?.also { currentHostTag = it }
-    }
+            ?.let {
+                currentHostTag = it
+                true
+            }
+            ?: false
 
     internal fun clear() {
         customElements.clear()
@@ -105,7 +108,7 @@ internal class TrapdoorInstrumentation private constructor() {
     private fun getElementByTag(tag: String): HostElement? =
         tag.takeIf { it.isNotEmpty() }
             ?.let {
-                elementsConfigured
+                globalElementsConfigured
                     ?.find { it.tag == tag }
                     ?: customElements.find { it.tag == tag }
             }

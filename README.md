@@ -42,7 +42,8 @@ dependencies {
 Usage
 ---
 
-```Kotlin
+Kotlin
+```kotlin
 val trapdoor = Trapdoor.with(okhttpClient)
     // enable http request log default built-in
     .enableHttpLog()
@@ -53,6 +54,20 @@ retrofit = Retrofit.Builder()
     …
     // important, replace request call-factory
     .callFactory(client)
+    .build()
+```
+
+Java
+```java
+Trapdoor trapdoor = Trapdoor.with(okhttpClient);
+// enable http request log default built-in
+trapdoor.enableHttpLog();
+
+Retrofit retrofit = new Retrofit.Builder()
+    .baseUrl(…)
+    …
+    .callFactory(trapdoor.factory())
+    .build();
 ```
 
 ### 配置服务器列表
@@ -84,16 +99,43 @@ app assets 目录下添加文件 `trapdoor_host_config.txt`
 ```
 示例：[sample](sample/src/main/assets/trapdoor_host_config.txt)
 
+_full host config_
+```json
+[
+    {
+        "label": "开发-dns",
+        "tag": "dev-dns",
+        "host": "d.github.com",
+        "scheme": "https",
+        "mode": "url|dns",
+        "inet": [
+            "185.199.108.153"
+        ]
+    },
+    {
+        …
+    }
+]
+```
+|             |          |                                |                |
+| ----------- | -------- | ------------------------------ | -------------- |
+| __Require__ | *`label` | 服务器标识                     |                |
+| __Require__ | *`tag`   | 服务器唯一标签                 |                |
+| __Require__ | *`host`  | 服务器域名                     |                |
+| _Optional_  | `scheme` | 服务器协议 `http` / `https`    | default `http` |
+| _Optional_  | `mode`   | 模式选择 `url` / `dns`         | default `url`  |
+| _Optional_  | `inet`   | dns 模式：域名解析 IP 地址数组 |                |
+
 #### 手动配置
 
-```Kotlin
+```kotlin
 // 对当前 trapdoor 实例配置服务器
 trapdoor.customConfig(…)
 ```
 
 ### 切换服务器
 
-```Kotlin
+```kotlin
 // 根据配置的服务器标签选择
 trapdoor.select(hostTag)
 ```
@@ -108,13 +150,20 @@ dependencies {
 ```
 
 启用指示器
-```Kotlin
+
+_Kotlin_
+```kotlin
 trapdoor.enableFloatingBuoy(application)
+```
+
+_Java_
+```java
+TrapdoorBuoyUtil.enableFloatingBuoy(application, trapdoor);
 ```
 
 启用后自动监听 `Activity`，悬浮指示器点击弹出服务器列表选择
 
-LICENSE
+License
 ---
 ```
 MIT License

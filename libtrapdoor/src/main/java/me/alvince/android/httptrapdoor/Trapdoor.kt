@@ -114,10 +114,10 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
     fun select(tag: String) {
         tag.takeIf { it.isNotEmpty() }
             ?.also {
-                if (BuildConfig.DEBUG) {
-                    TrapdoorLogger.i("select host [$tag] by instrumentation{$instrumentation} from {$this}")
+                TrapdoorLogger.iIfDebug("select host [$tag] by instrumentation{$instrumentation} from {$this}")
+                if (instrumentation.pick(it)) {
+                    TrapdoorLogger.i("Host[$tag] selected:\n${host()}")
                 }
-                instrumentation.pick(it)
             }
     }
 
@@ -131,6 +131,9 @@ class Trapdoor private constructor(private val source: OkHttpClient) {
     }
 
 
+    /**
+     * [Trapdoor] options
+     */
     private class Options {
         var withLog: Boolean = false
     }

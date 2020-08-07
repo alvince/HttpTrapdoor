@@ -8,18 +8,26 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import me.alvince.android.httptrapdoor.Trapdoor
 import okhttp3.OkHttpClient
+import retrofit2.Retrofit
 
 class MainActivity : AppCompatActivity() {
 
-    private val httpClient by lazy {
-        OkHttpClient.Builder().build()
-    }
+    private lateinit var retrofit: Retrofit
 
-    private var trapdoor = Trapdoor.with(httpClient)
+    private lateinit var trapdoor: Trapdoor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        trapdoor = Trapdoor.with(OkHttpClient.Builder().build())
+            .apply {
+                enableHttpLog()
+            }
+        retrofit = Retrofit.Builder()
+            .baseUrl("https://www.github.com")
+            .callFactory(trapdoor.factory())
+            .build()
     }
 
     override fun onResume() {

@@ -30,16 +30,24 @@ class TrapdoorLogger {
 
     companion object {
         fun i(message: String) {
-            Log.i(Trapdoor.TRAPDOOR_TAG, message)
+            message.takeIf { it.isNotEmpty() }
+                ?.also {
+                    Log.i(Trapdoor.TRAPDOOR_TAG, message)
+                }
         }
 
         fun iIfDebug(message: String) {
-            message.takeIf { BuildConfig.DEBUG }
-                ?.also { i(it) }
+            if (BuildConfig.DEBUG) {
+                i(message)
+            }
         }
 
-        fun e(message: String, error: Throwable?) {
+        fun e(message: String, error: Throwable? = null) {
             Log.e(Trapdoor.TRAPDOOR_TAG, message, error)
+        }
+
+        fun w(message: String, throwable: Throwable? = null) {
+            Log.w(Trapdoor.TRAPDOOR_TAG, message, throwable)
         }
     }
 

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "me.alvince.android.httptrapdoor.sample"
-        minSdkVersion 16
+        minSdkVersion 26
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -35,6 +35,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:${getProperty('lib.square.okhttp')}"
     implementation "com.squareup.retrofit2:retrofit:${getProperty('lib.square.retrofit')}"
     implementation project(':libtrapdoor')
+    implementation project(':trapdoor-buoy')
 
     testImplementation "junit:junit:${getProperty('lib.junit')}"
 

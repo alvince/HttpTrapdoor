@@ -1,6 +1,6 @@
 package me.alvince.android.httptrapdoor.util;
 
-public class Preconditions {
+public class Predicates {
 
     public static <T> T requireNonNull(T obj) {
         if (obj == null)

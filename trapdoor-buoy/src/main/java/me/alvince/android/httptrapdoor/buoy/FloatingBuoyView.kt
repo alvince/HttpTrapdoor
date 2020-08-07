@@ -61,6 +61,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 
     internal var floatAttrs: WindowManager.LayoutParams? = null
 
+    // TODO: drag support
     private val touchStartPoint = PointF()
     private val touchMovedPoint = PointF()
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -113,6 +114,7 @@ private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
         .apply {
             color = 0x33000000
             style = Paint.Style.FILL_AND_STROKE
+            isAntiAlias = true
         }
 
     private val bgPath = Path()
@@ -155,13 +157,13 @@ private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
                 moveTo(0F, 0F)
                 lineTo(0F, height)
                 lineTo(width - cornerRadius, height)
-                arcToCompat(0F, 0F, height, height, 90F, -90F)
+                arcToCompat(width - height, 0F, width, height, 90F, -180F)
                 close()
             } else {
                 moveTo(width, 0F)
                 lineTo(width, height)
                 lineTo(cornerRadius, height)
-                arcToCompat(0F, 0F, height, height, 90F, 270F)
+                arcToCompat(0F, 0F, height, height, 90F, 180F)
                 close()
             }
         }.also {
@@ -178,7 +180,7 @@ private class BuoyBackgroundDrawable(private val insets: Int) : Drawable() {
         sweepAngle: Float
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            arcTo(0F, 0F, 0F, 0F, startAngle, sweepAngle, false)
+            arcTo(left, top, right, bottom, startAngle, sweepAngle, false)
         } else {
             compatCornerRectF.apply {
                 set(left, top, right, bottom)
